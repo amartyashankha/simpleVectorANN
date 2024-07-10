@@ -5,7 +5,7 @@ from joblib import Parallel, delayed
 import numpy as np
 
 class KMeans:
-    def __init__(self, n_clusters=10, n_dimensions=128, max_iters=10):
+    def __init__(self, n_clusters=10, n_dimensions=128, max_iters=100):
         self.n_dimensions = n_dimensions
         self.n_clusters = n_clusters
         self.data = np.empty((0, n_dimensions))

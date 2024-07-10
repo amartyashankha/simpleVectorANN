@@ -1,5 +1,6 @@
 import os 
 
+import argparse
 import h5py
 import numpy as np
 from joblib import Parallel, delayed
@@ -8,10 +9,15 @@ from tqdm import tqdm
 from .load_data import download_dataset
 from .KMeans import KMeans
 
-def query_NN(query_point, kmeans):
-    return kmeans.queryANN(query_point)
-
 def main():
+    parser = argparse.ArgumentParser(description='ANN based on inverted indices')
+    parser.add_argument('-K', '--num-clusters', type=int, help='Number of K-means clusters', required=False, default=100)
+    parser.add_argument('-P', '--num-clusters-to-search', type=int, help='Number of nearest clusters to search', required=False, default=3)
+    parser.add_argument('-t', '--tolerance', type=float, help='Tolerance for K-means convergence', required=False, default=10)
+
+    args = parser.parse_args()
+
+
     hdf5_filename = "sift.hdf5"
     if not os.path.exists(hdf5_filename):
         download_dataset(hdf5_filename)
@@ -23,14 +29,17 @@ def main():
     nearest_neighbors = np.array(dataset["nearest_neighbors"])
     dimension = dataset.attrs["dimension"]
 
-    kmeans = KMeans(n_clusters=100, n_dimensions=128, max_iters=100)
+    kmeans = KMeans(n_clusters=args.num_clusters, n_dimensions=dimension, max_iters=100)
     kmeans.add_points(points)
-    kmeans.fit(tolerance=10)
+    kmeans.fit(tolerance=args.tolerance)
 
     # Truncating queries to evaluate faster
-    queries = queries[:100]
+    queries = queries[:1000]
     #evaluated_NN_values = Parallel(n_jobs=8)(delayed(query_NN)(query_point, kmeans) for query_point in tqdm(queries))
-    evaluated_NN_values = [query_NN(query_point, kmeans) for query_point in tqdm(queries)]
+    evaluated_NN_values = [
+        kmeans.queryANN(query_point, num_centroids_to_check=args.num_clusters_to_search)
+        for query_point in tqdm(queries)
+        ]
     print("Finished evaluating queries")
     print("Computing recall@10 . . .")
 

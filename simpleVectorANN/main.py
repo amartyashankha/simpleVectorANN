@@ -35,9 +35,6 @@ def main():
     for evaluated_NN, groundtruth_NN in zip(evaluated_NN_values, nearest_neighbors):
         groundtruth_NN_truncated = groundtruth_NN[:10]
         recall_at_10 = len(set(evaluated_NN) & set(groundtruth_NN_truncated)) / 10
-        #if recall_at_10 != 1.0:
-            #print(recall_at_10)
-            #import pdb; pdb.set_trace()
         recall_at_10_accumulator += recall_at_10
     
     print(f"Average recall@10: {recall_at_10_accumulator / len(queries)}")

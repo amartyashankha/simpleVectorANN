@@ -24,11 +24,11 @@ def main():
     dimension = dataset.attrs["dimension"]
 
     kmeans = KMeans(n_clusters=100, n_dimensions=128, max_iters=100)
-    kmeans.add_points(points:100000])
+    kmeans.add_points(points)
     kmeans.fit(tolerance=10)
 
+    # Truncating queries to evaluate faster
     queries = queries[:100]
-    #evaluated_NN_values = [query_NN(query_point, kmeans) for query_point in queries[:100]]
     evaluated_NN_values = Parallel(n_jobs=32)(delayed(query_NN)(query_point, kmeans) for query_point in tqdm(queries))
 
     recall_at_10_accumulator = 0

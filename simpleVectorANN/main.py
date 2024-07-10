@@ -4,6 +4,7 @@ import h5py
 import numpy as np
 
 from .load_data import download_dataset
+from .KMeans import KMeans
 
 def main():
     hdf5_filename = "sift.hdf5"
@@ -17,14 +18,12 @@ def main():
     nearest_neighbors = np.array(dataset["nearest_neighbors"])
     dimension = dataset.attrs["dimension"]
 
-    query_point = queries[0]
-    distance_vectors = points - query_point
-    print(distance_vectors.shape)
-    distances = np.sum(distance_vectors * distance_vectors, axis=1)
-    distance_index_tuples = list(zip(distances, range(len(distances))))
-    distance_index_tuples.sort()
-    print(distances.shape)
+    kmeans = KMeans()
+    kmeans.add_points(points[:1000])
+    kmeans.fit()
+
     import pdb; pdb.set_trace()
+
 
 if __name__ == "__main__":
     main()

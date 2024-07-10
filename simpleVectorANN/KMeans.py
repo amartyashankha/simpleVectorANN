@@ -85,7 +85,7 @@ class KMeans:
             raise ValueError(f"Trying to insert data with {X.shape[1]} dimensions, must be {self.n_dimensions}")
         self.data = np.concat((self.data, X), axis=0)
     
-    def queryANN(self, query_point, num_NN=10, num_centroids_to_check=1):
+    def queryANN(self, query_point, num_centroids_to_check=1, num_NN=10):
         distances_to_centroids = np.linalg.norm(query_point - self.centroids, axis=1)
         nearest_centroid_indices = np.argsort(distances_to_centroids)
 

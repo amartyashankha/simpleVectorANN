@@ -29,7 +29,8 @@ def main():
 
     # Truncating queries to evaluate faster
     queries = queries[:100]
-    evaluated_NN_values = Parallel(n_jobs=32)(delayed(query_NN)(query_point, kmeans) for query_point in tqdm(queries))
+    #evaluated_NN_values = Parallel(n_jobs=8)(delayed(query_NN)(query_point, kmeans) for query_point in tqdm(queries))
+    evaluated_NN_values = [query_NN(query_point, kmeans) for query_point in tqdm(queries)]
     print("Finished evaluating queries")
     print("Computing recall@10 . . .")
 

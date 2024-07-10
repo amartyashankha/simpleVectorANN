@@ -1,7 +1,7 @@
 import os
 import tarfile
-from urllib.request import urlretrieve
 
+from urllib.request import urlretrieve
 import h5py
 import numpy as np
 from typing import Any

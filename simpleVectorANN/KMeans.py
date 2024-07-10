@@ -29,7 +29,7 @@ class KMeans:
                 points_in_cluster_i = self.data[self.cluster_members[i]]
                 self.centroids[i] = np.mean(points_in_cluster_i, axis=0)
 
-    def fit(self):
+    def fit(self, tolerance=1e-6):
         if self.n_clusters > len(self.data):
             raise ValueError(
                 f"Too many centroids: Cannot cluster {len(self.data)} points with {self.n_clusters} centers.")
@@ -45,6 +45,12 @@ class KMeans:
             self._update_centroids()
             centroid_shift = np.linalg.norm(self.centroids - old_centroids)
             print(f"Overall centroid shift: {centroid_shift}")
+            if centroid_shift < tolerance:
+                print("Converged")
+                break
+        print(f"Failed to converge after {self.max_iters} iterations.")
+
+        self.fitted = True
     
     def add_points(self, X):
         if X.shape[1] != self.n_dimensions:

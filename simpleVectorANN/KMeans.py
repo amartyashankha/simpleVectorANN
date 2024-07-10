@@ -55,7 +55,6 @@ class KMeans:
                 f"Too many centroids: Cannot cluster {len(self.data)} points with {self.n_clusters} centers.")
         if self.fitted:
             pass
-
         self._initialize_centroids()
         converged = False
         for i in range(self.max_iters):

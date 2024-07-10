@@ -93,4 +93,4 @@ class KMeans:
         data_subset_to_search = self.cluster_members[nearest_centroid_indices[0]]
         distances_to_subset_elements = np.linalg.norm(query_point - self.data[data_subset_to_search], axis=1)
         distance_index_tuples = zip(distances_to_subset_elements, data_subset_to_search)
-        return [i for _, i in sorted(distance_index_tuples)[:10]]
+        return [i for _, i in sorted(distance_index_tuples)[:num_NN]]

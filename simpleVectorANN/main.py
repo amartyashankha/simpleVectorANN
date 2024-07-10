@@ -2,9 +2,14 @@ import os
 
 import h5py
 import numpy as np
+from joblib import Parallel, delayed
+from tqdm import tqdm
 
 from .load_data import download_dataset
 from .KMeans import KMeans
+
+def query_NN(query_point, kmeans):
+    return kmeans.queryANN(query_point)
 
 def main():
     hdf5_filename = "sift.hdf5"
@@ -18,16 +23,21 @@ def main():
     nearest_neighbors = np.array(dataset["nearest_neighbors"])
     dimension = dataset.attrs["dimension"]
 
-    kmeans = KMeans(n_clusters=10, n_dimensions=128, max_iters=100)
-    kmeans.add_points(points[:1000000])
+    kmeans = KMeans(n_clusters=100, n_dimensions=128, max_iters=100)
+    kmeans.add_points(points:100000])
     kmeans.fit(tolerance=10)
 
+    queries = queries[:100]
+    #evaluated_NN_values = [query_NN(query_point, kmeans) for query_point in queries[:100]]
+    evaluated_NN_values = Parallel(n_jobs=32)(delayed(query_NN)(query_point, kmeans) for query_point in tqdm(queries))
+
     recall_at_10_accumulator = 0
-    for query_point, groundtruth_NN in zip(queries, nearest_neighbors):
-        evaluated_NN = kmeans.queryANN(query_point)
-        recall_at_10 = len(set(evaluated_NN) & set(groundtruth_NN)) / 10
-        if recall_at_10 != 1.0:
-            print(recall_at_10)
+    for evaluated_NN, groundtruth_NN in zip(evaluated_NN_values, nearest_neighbors):
+        groundtruth_NN_truncated = groundtruth_NN[:10]
+        recall_at_10 = len(set(evaluated_NN) & set(groundtruth_NN_truncated)) / 10
+        #if recall_at_10 != 1.0:
+            #print(recall_at_10)
+            #import pdb; pdb.set_trace()
         recall_at_10_accumulator += recall_at_10
     
     print(f"Average recall@10: {recall_at_10_accumulator / len(queries)}")

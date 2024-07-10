@@ -1,3 +1,4 @@
+import time
 
 import numpy as np
 
@@ -33,22 +34,30 @@ class KMeans:
         if self.n_clusters > len(self.data):
             raise ValueError(
                 f"Too many centroids: Cannot cluster {len(self.data)} points with {self.n_clusters} centers.")
-        
         if self.fitted:
             pass
 
         self._initialize_centroids()
+        converged = False
         for i in range(self.max_iters):
             old_centroids = np.copy(self.centroids)
             print(f"Running iteration {i}")
+            start_time = time.time()
             self._assign_clusters()
+            elapsed_time = time.time() - start_time
+            print(f"Assigned clusters in: {elapsed_time}")
+            start_time = time.time()
             self._update_centroids()
-            centroid_shift = np.linalg.norm(self.centroids - old_centroids)
-            print(f"Overall centroid shift: {centroid_shift}")
+            elapsed_time = time.time() - start_time
+            print(f"Updated Centroids in: {elapsed_time}")
+            centroid_shift = np.mean(np.linalg.norm(self.centroids - old_centroids, axis=1))
+            print(f"Overall (average) centroid shift: {centroid_shift}")
             if centroid_shift < tolerance:
                 print("Converged")
+                converged = True
                 break
-        print(f"Failed to converge after {self.max_iters} iterations.")
+        if not converged:
+            print(f"Failed to converge after {self.max_iters} iterations.")
 
         self.fitted = True
     

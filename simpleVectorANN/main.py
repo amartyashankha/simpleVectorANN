@@ -18,11 +18,11 @@ def main():
     nearest_neighbors = np.array(dataset["nearest_neighbors"])
     dimension = dataset.attrs["dimension"]
 
-    kmeans = KMeans()
-    kmeans.add_points(points[:1000])
-    kmeans.fit()
+    kmeans = KMeans(n_clusters=10, n_dimensions=128, max_iters=100)
+    kmeans.add_points(points[:])
+    kmeans.fit(tolerance=10)
 
-    import pdb; pdb.set_trace()
+    #import pdb; pdb.set_trace()
 
 
 if __name__ == "__main__":

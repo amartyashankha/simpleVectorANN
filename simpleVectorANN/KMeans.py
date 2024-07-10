@@ -91,7 +91,7 @@ class KMeans:
 
         data_subset_to_search = np.concat([
             self.cluster_members[centroid_index]
-            for centroid_index in nearest_centroid_indices
+            for centroid_index in nearest_centroid_indices[:num_centroids_to_check]
         ])
         distances_to_subset_elements = np.linalg.norm(query_point - self.data[data_subset_to_search], axis=1)
         distance_index_tuples = zip(distances_to_subset_elements, data_subset_to_search)

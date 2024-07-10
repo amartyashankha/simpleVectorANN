@@ -35,7 +35,7 @@ def main():
 
     # Truncating queries to evaluate faster
     queries = queries[:1000]
-    #evaluated_NN_values = Parallel(n_jobs=8)(delayed(query_NN)(query_point, kmeans) for query_point in tqdm(queries))
+    print("Evaluating queries")
     evaluated_NN_values = [
         kmeans.queryANN(query_point, num_centroids_to_check=args.num_clusters_to_search)
         for query_point in tqdm(queries)

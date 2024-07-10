@@ -4,6 +4,7 @@ A simple implementation of a vector database with approximate nearest-neighbor s
 # Usage
 ```
 pip install -r requirements.txt
+
 python3 -m simpleVectorANN.main \
     -K <number of clusters> \
     -P <number of centroids to search> \

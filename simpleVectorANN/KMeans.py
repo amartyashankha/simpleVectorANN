@@ -1,5 +1,7 @@
 import time
 
+from joblib import Parallel, delayed
+
 import numpy as np
 
 class KMeans:
@@ -16,6 +18,23 @@ class KMeans:
     def _initialize_centroids(self):
         indices = np.random.choice(len(self.data), self.n_clusters, replace=False)
         self.centroids = self.data[indices]
+
+    def _find_closest_centroid_batch(self, j, N, job_size):
+        ret = []
+        for i in range(j * job_size, min(N, (j + 1) * job_size)):
+            point = self.data[i]
+            distances = np.linalg.norm(point - self.centroids, axis=1)
+            nearest_centroid = np.argmin(distances)
+            ret.append((nearest_centroid, i))
+        return ret
+
+    def _assign_clusters_parallel(self, n_jobs=32):
+        self.cluster_members = [[] for _ in range(self.n_clusters)]
+        N = len(self.data)
+        job_size = int(np.ceil(N / n_jobs))
+        return_assignments = Parallel(n_jobs=n_jobs)(delayed(self._find_closest_centroid_batch)(j, N, job_size) for j in range(n_jobs))
+        for nearest_centroid, point_index in np.concat(return_assignments):
+            self.cluster_members[nearest_centroid].append(point_index)
 
     def _assign_clusters(self):
         self.cluster_members = [[] for _ in range(self.n_clusters)]
@@ -43,7 +62,7 @@ class KMeans:
             old_centroids = np.copy(self.centroids)
             print(f"Running iteration {i}")
             start_time = time.time()
-            self._assign_clusters()
+            self._assign_clusters_parallel()
             elapsed_time = time.time() - start_time
             print(f"Assigned clusters in: {elapsed_time}")
             start_time = time.time()
@@ -65,3 +84,13 @@ class KMeans:
         if X.shape[1] != self.n_dimensions:
             raise ValueError(f"Trying to insert data with {X.shape[1]} dimensions, must be {self.n_dimensions}")
         self.data = np.concat((self.data, X), axis=0)
+    
+    def queryANN(self, query_point, num_NN=10):
+        distances_to_centroids = np.linalg.norm(query_point - self.centroids, axis=1)
+        nearest_centroid_indices = np.argsort(distances_to_centroids)
+
+        # Just using closest centroid for now
+        data_subset_to_search = self.cluster_members[nearest_centroid_indices[0]]
+        distances_to_subset_elements = np.linalg.norm(query_point - self.data[data_subset_to_search], axis=1)
+        distance_index_tuples = zip(distances_to_subset_elements, data_subset_to_search)
+        return [i for _, i in sorted(distance_index_tuples)[:10]]

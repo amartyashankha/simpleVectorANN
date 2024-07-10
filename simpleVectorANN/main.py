@@ -19,10 +19,18 @@ def main():
     dimension = dataset.attrs["dimension"]
 
     kmeans = KMeans(n_clusters=10, n_dimensions=128, max_iters=100)
-    kmeans.add_points(points[:])
+    kmeans.add_points(points[:1000000])
     kmeans.fit(tolerance=10)
 
-    #import pdb; pdb.set_trace()
+    recall_at_10_accumulator = 0
+    for query_point, groundtruth_NN in zip(queries, nearest_neighbors):
+        evaluated_NN = kmeans.queryANN(query_point)
+        recall_at_10 = len(set(evaluated_NN) & set(groundtruth_NN)) / 10
+        if recall_at_10 != 1.0:
+            print(recall_at_10)
+        recall_at_10_accumulator += recall_at_10
+    
+    print(f"Average recall@10: {recall_at_10_accumulator / len(queries)}")
 
 
 if __name__ == "__main__":
